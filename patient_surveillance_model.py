@@ -145,46 +145,61 @@ plt.show()
 
 from tensorflow.keras.metrics import Precision, Recall, BinaryAccuracy
 
-pre = Precision()
-re = Recall()
-acc = BinaryAccuracy()
+precisn = Precision()
+recl = Recall()
+bi_accuracy = BinaryAccuracy()
 
 for batch in test.as_numpy_iterator():
     X, y = batch
     yhat = seq_model.predict(X)
-    pre.update_state(y, yhat)
-    re.update_state(y, yhat)
-    acc.update_state(y, yhat)
+    precisn.update_state(y, yhat)
+    recl.update_state(y, yhat)
+    bi_accuracy.update_state(y, yhat)
 
-print(pre.result(), re.result(), acc.result())
+print(f'Presicion: {precisn.result().numpy()}, Recall:{recl.result().numpy()}, Accuracy: {bi_accuracy.result().numpy()}')
 
 """# 10. Test"""
 
-import cv2
-
-img = cv2.imread('154006829.jpg')
-plt.imshow(img)
+img_patient = cv2.imread(os.path.join(data_dir, 'patient_test.png'))
+plt.imshow(cv2.cvtColor(img_patient, cv2.COLOR_BGR2RGB))
 plt.show()
 
-resize = tf.image.resize(img, (256,256))
-plt.imshow(resize.numpy().astype(int))
+img_resized = tf.image.resize(img_patient, (256,256))
+plt.imshow(img_resized.numpy().astype(int))
 plt.show()
 
-yhat = seq_model.predict(np.expand_dims(resize/255, 0))
+yhat = seq_model.predict(np.expand_dims(img_resized/255, 0))
 
-yhat
+#np.expand_dims(img_resized/255, 0).shape
 
-if yhat > 0.5:
-    print(f'Predicted class is Sad')
+if yhat < 0.5:
+    print(f'Medical personnel')
 else:
-    print(f'Predicted class is Happy')
+    print(f'Patient')
+
+img_doctor = cv2.imread(os.path.join(data_dir, 'doctor_test.jpg'))
+plt.imshow(cv2.cvtColor(img_doctor, cv2.COLOR_BGR2RGB))
+plt.show()
+
+img_resized2 = tf.image.resize(img_doctor, (256,256))
+plt.imshow(img_resized2.numpy().astype(int))
+plt.show()
+
+yhat2 = seq_model.predict(np.expand_dims(img_resized2/255, 0))
+
+#np.expand_dims(img_resized/255, 0).shape
+
+if yhat2 < 0.5:
+    print(f'Medical personnel')
+else:
+    print(f'Patient')
 
 """# 11. Save the Model"""
 
 from tensorflow.keras.models import load_model
 
-seq_model.save(os.path.join('models','imageclassifier.h5'))
+seq_model.save(os.path.join('patients_doctors_model.h5'))
 
-new_model = load_model('imageclassifier.h5')
+new_model = load_model('patients_doctors_model.h5')
 
-new_model.predict(np.expand_dims(resize/255, 0))
+new_model.predict(np.expand_dims(img_resized/255, 0))
