@@ -202,4 +202,8 @@ seq_model.save(os.path.join('patients_doctors_model.h5'))
 
 new_model = load_model('patients_doctors_model.h5')
 
+seq_model.save(os.path.join('patients_doctors_model.keras'))
+
+new_model = load_model('patients_doctors_model.keras')
+
 new_model.predict(np.expand_dims(img_resized/255, 0))
